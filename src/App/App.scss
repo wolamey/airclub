@@ -1,0 +1,105 @@
+@font-face {
+  font-family: "tildasans regular";
+  src: url("../assets/font/TildaSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "tildasans semibold";
+  src: url("../assets/font/TildaSans-Semibold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: "tildasans bold";
+  src: url("../assets/font/TildaSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "tildasans black";
+  src: url("../assets/font/TildaSans-Black.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+}
+
+* {
+  font-family: "tildasans regular", sans-serif;
+  transition: 0.5s;
+}
+body {
+}
+.app {
+  margin: auto;
+  width: 100%;
+  max-width: 600px;
+  height: 100vh;
+  display: flex;
+  padding: 0 16px;
+}
+
+.title {
+  color: #1b1515;
+  text-align: center;
+
+  font-family: "tildasans black", sans-serif;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 105%;
+}
+.input {
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: #f7f7f7;
+  border: none;
+  border: 1px solid rgba(27, 21, 21, 0);
+  outline: none;
+  &::placeholder {
+    color: rgba(27, 21, 21, 0.4);
+    line-height: normal;
+
+    font-size: 17px;
+  }
+  &:focus {
+    border-radius: 10px;
+    border: 1px solid rgba(27, 21, 21, 0.5);
+    color: #191b1c;
+
+    background: #fff;
+  }
+}
+
+.button {
+  border: none;
+  outline: none;
+  padding: 16px 28px;
+  background: none;
+  border-radius: 10px;
+  font-family: "tildasans bold", sans-serif;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.rbutton {
+  background: #ff5248;
+  color: #fff;
+}
+
+.page_popup{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+a{
+  text-decoration: none;
+  color: #191b1c;
+}

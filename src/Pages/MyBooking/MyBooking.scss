@@ -1,0 +1,160 @@
+.mybook {
+  padding: 32px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.mybook_rbutton {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+.mybook_title {
+  margin: 32px 0 20px 0;
+}
+
+.mybook_container_top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin:0 0 16px 0 ;
+}
+.mybook_container_sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mybook_select {
+  border: none;
+  outline: none;
+  color: var(--gray, #545b5e);
+
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.mybook_container_calendar {
+  border-radius: 8px;
+  padding: 8px;
+  height: 36px;
+  width: 36px;
+height: fit-content;
+  background: #f7f7f7;
+}
+
+
+.mybook_wrapper{
+    height: 100%;
+    overflow: auto;
+    padding: 0 0 32px 0;
+    display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+.mybook_wrapper_item{
+    display: flex;
+padding: 16px;
+flex-direction: column;
+gap: 16px;
+    border-radius: 16px;
+background: #F7F7F7;
+}
+.mybook_wrapper_item_top{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.mybook_wrapper_item_top_item{
+    display: flex;
+flex-direction: column;
+gap: 4px;
+}
+
+.mybook_wrapper_item_top_title{
+    color: rgba(27, 21, 21, 0.40);
+
+font-size: 15px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+}
+.mybook_wrapper_item_top_value{
+    color: #1B1515;
+
+font-size: 17px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+}
+
+.mybook_buttons_wrapper{
+    display: flex;
+align-items: center;
+gap: 8px;
+}
+.mybook_button_trash{
+    border-radius: 10px;
+border: 1px solid var(--red, #FF5248);
+display: flex;
+padding: 12px;
+justify-content: center;
+align-items: center;
+gap: 12px;
+}
+
+.mybook_scheme_button{
+    display: flex;
+padding: 12px 20px;
+justify-content: center;
+align-items: center;
+gap: 12px;
+flex: 1 0 0;border-radius: 10px;
+background: #FFF;
+}
+.mybook_zero{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.mybook_zero_container   {
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+
+.mybook{
+
+.react-calendar__tile {
+  abbr{
+  opacity: 0.3;
+
+  }
+  pointer-events: none;
+}
+.booked-date{
+  pointer-events: all;
+  abbr{
+  opacity: 1;
+
+  }
+}
+.mybook_reset_date_button{
+  padding: 10px 20px;
+  height: 100%;
+      background: #f7f7f7;
+}
+
+}

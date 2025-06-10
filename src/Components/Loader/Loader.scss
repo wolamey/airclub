@@ -1,0 +1,39 @@
+@use "three-dots";
+
+.loader {
+  padding: 30px;
+
+  &.big {
+    width: 100%;
+z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.378);
+    backdrop-filter: blur(3px);
+  }
+}
+
+$dot-color: #ff5248;
+$dot-bg-color: $dot-color;
+$dot-before-color: $dot-color;
+$dot-after-color: $dot-color;
+
+.dot-collision {
+  background-color: #ff5248 !important;
+  color: #ff5248 !important;
+
+  &::before {
+    background-color: #ff5148cd !important;
+    color: #ff5148cd !important;
+  }
+  &::after {
+    background-color: #ff5148cd !important;
+    color: #ff5148cd !important;
+  }
+}

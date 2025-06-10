@@ -1,0 +1,30 @@
+.success_popup_container_title{
+    color: #1B1515;
+text-align: center;
+  font-family: "tildasans bold", sans-serif;
+font-size: 24px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+max-width: 325px;
+}
+.success_button{
+    width: 100%;
+    margin: 12px 0 0 0;
+}
+.success_popup_container{
+display: flex;
+padding: 80px 24px;
+flex-direction: column;
+align-items: center;
+gap: 10px;
+}
+.booking_fields_button{
+  border-radius: 10px;color: #FFF;
+
+
+background: var(--black, #191B1C);
+}
+.success_popup_container_title2{
+    max-width: 600px;
+}
