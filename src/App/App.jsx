@@ -69,7 +69,7 @@ function App() {
           path="/tobook"
           element={<Booking refreshToken={refreshToken} />}
         />
-        <Route path="/" element={<MyBooking />} />
+        <Route path="/" element={<MyBooking  refreshToken={refreshToken}/>} />
       </Routes>
     </div>
   );

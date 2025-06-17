@@ -7,6 +7,7 @@ import trash from "../../assets/trash.svg";
 import Loader from "../../Components/Loader/Loader";
 import Calendar from "react-calendar";
 import DeleteBooking from "../../Components/DeleteBooking/DeleteBooking";
+import ShowImg from "../../Components/ShowImg/ShowImg";
 
 export default function MyBooking({ refreshToken }) {
   const [bookings, setBookings] = useState([]);
@@ -16,6 +17,10 @@ export default function MyBooking({ refreshToken }) {
   const [tempDate, setTempDate] = useState(null);
   const [sortOption, setSortOption] = useState("date-asc");
   const [showDeletePopup, setShowDeletePopup] = useState(null);
+    const [showSchemePopup, setShowSchemePopup] = useState(false);
+  const [schemeImageUrl, setSchemeImageUrl] = useState("");
+  const [schemeLocationName, setSchemeLocationName] = useState("");
+  const [locationInfos, setLocationInfos] = useState([]);
   const getCookie = (name) => {
     const c = document.cookie
       .split("; ")
@@ -122,11 +127,49 @@ export default function MyBooking({ refreshToken }) {
     setSortOption(e.target.value);
   };
 
-  // Сбросить фильтр по дате
   const handleResetDate = () => setSelectedDate(null);
+const fetchLocationInfos = async () => {
+    let token = getCookie("access_token") || (await refreshToken());
+    if (!token) return;
+    const resp = await fetch("https://beta-seathub.aeroclub.ru/Booking/location_infos", {
+      headers: { Accept: "text/plain", Authorization: `Bearer ${token}` },
+    });
+    if (resp.status === 401) {
+      token = await refreshToken();
+      if (token) return fetchLocationInfos();
+    }
+    if (resp.ok) {
+      const json = await resp.json();
+      setLocationInfos(json.data.locationInfos);
+    }
+  };
 
+  useEffect(() => {
+    fetchBookings();
+    fetchLocationInfos();
+  }, []);
+
+   const handleShowScheme = (locId, locName) => {
+    const info = locationInfos.find((li) => li.locationId === locId);
+    setSchemeImageUrl(info?.imageUrl || "");
+    setSchemeLocationName(locName);
+    setShowSchemePopup(true);
+  };
+  const handleCloseScheme = () => {
+    setShowSchemePopup(false);
+    setSchemeImageUrl("");
+    setSchemeLocationName("");
+  };
   return (
     <div className="mybook">
+ {showSchemePopup && (
+        <ShowImg
+          imageUrl={schemeImageUrl}
+          locationName={schemeLocationName}
+          closeScheme={handleCloseScheme}
+        />
+      )}
+      {/* <ShowImg imageUrl={'../../assets/flag.svg'}/> */}
       {!isLoading && bookings.length > 0 ? (
         <>
           <a href="/tobook" className="button rbutton mybook_rbutton">
@@ -201,7 +244,7 @@ export default function MyBooking({ refreshToken }) {
                     >
                       <img src={trash} alt="Удалить" />
                     </div>
-                    <button className="button mybook_scheme_button">
+                    <button className="button mybook_scheme_button"  onClick={() => handleShowScheme(item.locationId, item.location)}>
                       Схема мест
                     </button>
                   </div>
