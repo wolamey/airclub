@@ -54,7 +54,8 @@ function App() {
         console.log("Токен отсутствует, обновляем...");
         const newToken = await refreshToken();
         if (!newToken) {
-          navigate("/auth");
+        navigate("/auth");
+
         }
       }
     };
@@ -69,7 +70,10 @@ function App() {
           path="/tobook"
           element={<Booking refreshToken={refreshToken} />}
         />
-        <Route path="/" element={<MyBooking  refreshToken={refreshToken}/>} />
+        <Route
+          path="/"
+          element={<MyBooking refreshToken={refreshToken} />}
+        />
       </Routes>
     </div>
   );
