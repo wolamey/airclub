@@ -2,7 +2,7 @@
   "name": "airclub",
   "private": true,
   "version": "0.1.0",
-  "homepage": "https://wolamey.github.io/airclub",
+"homepage": "https://wolamey.github.io/airclub",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
