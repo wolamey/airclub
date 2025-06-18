@@ -26,13 +26,12 @@
 * {
   font-family: "tildasans regular", sans-serif;
   transition: 0.5s;
-  margin: 0 
-  ;
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 body {
-  
+  background: #FFFFFF;
 }
 .app {
   margin: auto;
@@ -92,7 +91,7 @@ body {
   color: #fff;
 }
 
-.page_popup{
+.page_popup {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -103,7 +102,7 @@ body {
   align-items: center;
 }
 
-a{
+a {
   text-decoration: none;
   color: #191b1c;
 }
