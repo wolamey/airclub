@@ -172,7 +172,7 @@ const fetchLocationInfos = async () => {
       {/* <ShowImg imageUrl={'../../assets/flag.svg'}/> */}
       {!isLoading && bookings.length > 0 ? (
         <>
-          <a href="/tobook" className="button rbutton mybook_rbutton">
+          <a href="tobook" className="button rbutton mybook_rbutton">
             <img src={save_add} className="mybook_rbutton_img" alt="" />
             Забронировать место
           </a>
@@ -309,7 +309,7 @@ const fetchLocationInfos = async () => {
             <p className="mybook_zero_text">
               У вас пока нет активных бронирований
             </p>
-            <a href="/tobook" className="button rbutton mybook_rbutton">
+            <a href="tobook" className="button rbutton mybook_rbutton">
               <img src={save_add} className="mybook_rbutton_img" alt="" />
               Забронировать место
             </a>

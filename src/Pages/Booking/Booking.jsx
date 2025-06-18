@@ -30,22 +30,20 @@ export default function Booking({ refreshToken }) {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [errorText, setErrorText] = useState('')
-const [showErrorPopup,setShowErrorPopup] = useState(false)
+  const [errorText, setErrorText] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
 
-
-useEffect(()=> {
-  const tg = window.Telegram.WebApp;
-  tg.BackButton.show(); 
-  tg.BackButton.onClick(()=>{
-    window.location.href = '/';
-
-  })
-  return ()=>{
-    tg.BackButton.offClick(()=>{})
-    tg.BackButton.hide()
-  }
-},[])
+  useEffect(() => {
+    const tg = window.Telegram.WebApp;
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => {
+      window.location.href = "/airclub/";
+    });
+    return () => {
+      tg.BackButton.offClick(() => {});
+      tg.BackButton.hide();
+    };
+  }, []);
 
   // --- утилиты ---
   const getCookie = (name) => {
@@ -81,31 +79,28 @@ useEffect(()=> {
     fetchLocations();
   }, []);
 
-  
+  const handleConfirmDate = () => {
+    if (tempDate) {
+      const correctedDate = new Date(tempDate);
+      correctedDate.setHours(13, 0, 0, 0); // Устанавливаем час дня
 
-const handleConfirmDate = () => {
-  if (tempDate) {
-    const correctedDate = new Date(tempDate);
-    correctedDate.setHours(13, 0, 0, 0); // Устанавливаем час дня
+      setSelectedDate(correctedDate);
+      console.log(correctedDate); // Теперь в консоли будет корректное значение
 
-    setSelectedDate(correctedDate);
-    console.log(correctedDate); // Теперь в консоли будет корректное значение
+      setFormattedDate(
+        correctedDate.toLocaleDateString("ru-RU", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+      );
 
-    setFormattedDate(
-      correctedDate.toLocaleDateString("ru-RU", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-    );
-
-    setTempDate(null);
-    setIsCalendarOpen(false);
-    setFormattedRoom("");
-    setSelectedRoom(null);
-  }
-};
-
+      setTempDate(null);
+      setIsCalendarOpen(false);
+      setFormattedRoom("");
+      setSelectedRoom(null);
+    }
+  };
 
   // --- выбор локации ---
   const handleLocationSelection = (loc) => {
@@ -161,16 +156,15 @@ const handleConfirmDate = () => {
 
   const openRoomPopup = () => {
     if (!selectedLocation) {
-      setErrorText('Сначала выберите локацию')
-      setShowErrorPopup(true)
-      return
-    } 
+      setErrorText("Сначала выберите локацию");
+      setShowErrorPopup(true);
+      return;
+    }
     if (!selectedDate) {
-      setErrorText('Сначала выберите дату')
-      setShowErrorPopup(true)
-      return
-
-    }  
+      setErrorText("Сначала выберите дату");
+      setShowErrorPopup(true);
+      return;
+    }
     const dateIso = selectedDate.toISOString().split("T")[0];
     fetchRooms(selectedLocation.id, dateIso).then(() => {
       setSelectedRoom(null);
@@ -185,70 +179,74 @@ const handleConfirmDate = () => {
     }
   };
 
- const handleBooking = async () => {
-  if (!selectedDate || !selectedLocation || !selectedRoom) {
-    setShowBookingFields(true);
-    return;
-  }
-
-  const userEmail = getCookie("user_email");
-  const body = {
-    userEmail: "Vadim.Koshelev@aeroclub.ru",
-    locationPlaceId: selectedRoom.placeId,
-    date: selectedDate.toISOString(),
-    deleteExistedBooking: false,
-  };
-
-  console.log(selectedDate.toISOString().split("T")[0]);
-
-  let token = getCookie("access_token") || (await refreshToken());
-  if (!token) return console.error("Нет токена");
-
-  try {
-    setLoading(true);
-    const resp = await fetch("https://beta-seathub.aeroclub.ru/Booking/book", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (resp.status === 401) {
-      token = await refreshToken();
-      if (token) return handleBooking();
+  const handleBooking = async () => {
+    if (!selectedDate || !selectedLocation || !selectedRoom) {
+      setShowBookingFields(true);
+      return;
     }
 
-    const text = await resp.text();
-    
-    if (!resp.ok) {
-      console.error("Ошибка от сервера:", resp.status, text);
+    const userEmail = getCookie("user_email");
+    const body = {
+      userEmail: "Vadim.Koshelev@aeroclub.ru",
+      locationPlaceId: selectedRoom.placeId,
+      date: selectedDate.toISOString(),
+      deleteExistedBooking: false,
+    };
 
-      try {
-        const errorData = JSON.parse(text);
-        console.log(errorData.errorCode)
-        if (errorData.errorCode === 3001) {
-          console.log('ppp')
-          setErrorText(errorData.error + ' Пожалуйста, выберите другую дату.'); // Передаем текст ошибки
-          setShowErrorPopup(true); // Показываем всплывающее окно
+    console.log(selectedDate.toISOString().split("T")[0]);
+
+    let token = getCookie("access_token") || (await refreshToken());
+    if (!token) return console.error("Нет токена");
+
+    try {
+      setLoading(true);
+      const resp = await fetch(
+        "https://beta-seathub.aeroclub.ru/Booking/book",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
         }
-      } catch (parseError) {
-        console.error("Ошибка парсинга ответа:", parseError);
+      );
+
+      if (resp.status === 401) {
+        token = await refreshToken();
+        if (token) return handleBooking();
       }
 
-      throw new Error(`Status ${resp.status}`);
+      const text = await resp.text();
+
+      if (!resp.ok) {
+        console.error("Ошибка от сервера:", resp.status, text);
+
+        try {
+          const errorData = JSON.parse(text);
+          console.log(errorData.errorCode);
+          if (errorData.errorCode === 3001) {
+            console.log("ppp");
+            setErrorText(
+              errorData.error + " Пожалуйста, выберите другую дату."
+            ); // Передаем текст ошибки
+            setShowErrorPopup(true); // Показываем всплывающее окно
+          }
+        } catch (parseError) {
+          console.error("Ошибка парсинга ответа:", parseError);
+        }
+
+        throw new Error(`Status ${resp.status}`);
+      }
+
+      setShowSuccess(true);
+    } catch (e) {
+      console.error("Ошибка бронирования:", e);
+    } finally {
+      setLoading(false);
     }
-
-    setShowSuccess(true);
-
-  } catch (e) {
-    console.error("Ошибка бронирования:", e);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="tobook">
@@ -385,8 +383,12 @@ const handleConfirmDate = () => {
         {showBookingFields && (
           <BookingFields setShowBookingFields={setShowBookingFields} />
         )}
-        {showErrorPopup && <ShowError errorText={errorText} setShowErrorPopup={setShowErrorPopup} />}
-
+        {showErrorPopup && (
+          <ShowError
+            errorText={errorText}
+            setShowErrorPopup={setShowErrorPopup}
+          />
+        )}
       </div>
     </div>
   );
