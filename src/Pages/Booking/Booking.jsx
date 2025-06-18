@@ -33,6 +33,20 @@ export default function Booking({ refreshToken }) {
   const [errorText, setErrorText] = useState('')
 const [showErrorPopup,setShowErrorPopup] = useState(false)
 
+
+useEffect(()=> {
+  const tg = window.Telegram.WebApp;
+  tg.BackButton.show(); 
+  tg.BackButton.onClick(()=>{
+    window.location.href = '/';
+
+  })
+  return ()=>{
+    tg.BackButton.offClick(()=>{})
+    tg.BackButton.hide()
+  }
+},[])
+
   // --- утилиты ---
   const getCookie = (name) => {
     const c = document.cookie
