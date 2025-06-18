@@ -37,7 +37,7 @@ export default function Booking({ refreshToken }) {
     const tg = window.Telegram.WebApp;
     tg.BackButton.show();
     tg.BackButton.onClick(() => {
-      window.location.href = "/airclub/";
+      window.location.href = "/";
     });
     return () => {
       tg.BackButton.offClick(() => {});
