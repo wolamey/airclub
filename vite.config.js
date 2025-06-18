@@ -5,4 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base:'/airclub/',
   plugins: [react()],
+  server: {
+    allowedHosts: ['hotdesk-client.aeroclub.ru'],
+  }
 })
