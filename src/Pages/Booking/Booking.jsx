@@ -45,7 +45,6 @@ export default function Booking({ refreshToken }) {
     };
   }, []);
 
-  // --- утилиты ---
   const getCookie = (name) => {
     const c = document.cookie
       .split("; ")
@@ -53,7 +52,6 @@ export default function Booking({ refreshToken }) {
     return c ? c.split("=")[1] : null;
   };
 
-  // --- загрузка локаций ---
   const fetchLocations = async () => {
     let token = getCookie("access_token") || (await refreshToken());
     if (!token) return console.error("Нет токена");
@@ -314,7 +312,17 @@ export default function Booking({ refreshToken }) {
               <Calendar
                 onChange={setTempDate}
                 value={tempDate || selectedDate}
+                minDate={new Date()}
+                tileDisabled={({ date }) =>
+                  date < new Date(new Date().setHours(0, 0, 0, 0))
+                }
+                tileClassName={({ date, view }) => {
+                  if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                    return "calendar-tile-disabled";
+                  }
+                }}
               />
+
               <div className="tobook_date_buttons_wrapper">
                 <button
                   className="button rbutton tobook_pick_date_button"
@@ -365,7 +373,7 @@ export default function Booking({ refreshToken }) {
                   className="button rbutton tobook_pick_date_button"
                   onClick={handleConfirmRoom}
                 >
-                  Выбрать номер
+                  Выбрать
                 </button>
                 <button
                   className="button tobook_decline_date_button"

@@ -52,6 +52,13 @@ font-size: 24px;
 font-style: normal;
 font-weight: 700;
 line-height: normal;
+
+word-break: break-word;
+overflow-wrap: break-word;
+hyphens: auto;
+
+width: 100%;
+
 }
 .auth_popup_container_text{
     color:  #545B5E;
@@ -78,4 +85,19 @@ text-decoration-thickness: auto;
 text-underline-offset: auto;
 text-underline-position: from-font;
 }
+}
+
+.auth_popup_container_link{
+  color: #5C5151;
+text-align: center;
+font-size: 17px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+text-decoration-line: underline;
+text-decoration-style: solid;
+text-decoration-skip-ink: auto;
+text-decoration-thickness: auto;
+text-underline-offset: auto;
+text-underline-position: from-font;
 }

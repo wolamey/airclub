@@ -47,7 +47,7 @@ export default function Auth() {
          setCookie("user_email", login, 7);
         navigate("/");
       } else {
-        setErrorMessage("Ошибка авторизации: " + (data.error_description || "Некорректные данные"));
+        setErrorMessage("Данные не верные");
         setPopState(true);
       }
     } catch (error) {
@@ -97,6 +97,10 @@ export default function Auth() {
               <p className="auth_popup_container_text">
                 Повторите попытку или обратитесь к администратору системы
               </p>
+
+              <a href="" className="auth_popup_container_link">
+                (контакт отвественного)
+              </a>
             </div>
           </div>
         </div>

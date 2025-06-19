@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
 
-width: 100%;
+  width: 100%;
   .tobook_title {
     margin: 0 0 32px 0;
   }
@@ -51,14 +51,14 @@ width: 100%;
           color: rgba(25, 27, 28, 0.3);
           font-size: 17px;
           font-weight: 400;
-border: 1px solid rgba(0, 0, 0, 0);
+          border: 1px solid rgba(0, 0, 0, 0);
           &.active {
             color: #191b1c;
           }
-          &.location_chosen{
+          &.location_chosen {
             border-radius: 10px;
-border: 1px solid var(--red, #FF5248);
-background: #FFF5F4;
+            border: 1px solid var(--red, #ff5248);
+            background: #fff5f4;
           }
         }
       }
@@ -256,12 +256,18 @@ background: #FFF5F4;
 }
 
 .page_popup_rooms_wrapper {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  // display: grid;
+  // grid-template-columns: repeat(5, 1fr);
+  // width: 100%;
+  // gap: 12px;
+  // max-height: 800px;
+  // overflow: auto;
   width: 100%;
   gap: 12px;
-  max-height: 400px;
+  max-height: 200px;
   overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   .page_popup_rooms_item {
     width: 100%;
     display: flex;
@@ -270,39 +276,49 @@ background: #FFF5F4;
     height: 48px;
     border-radius: 10px;
     background: #fff;
-pointer-events: none;
-    color: var(--unactive, rgba(25, 27, 28, 0.30));
-text-align: center;
-font-size: 17px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-border: 1px solid rgba(0, 0, 0, 0);
+    pointer-events: none;
+    color: var(--unactive, rgba(25, 27, 28, 0.3));
+    text-align: center;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border: 1px solid rgba(0, 0, 0, 0);
 
-&.active{
-    color: var(--black, #191B1C);
-text-align: center;
-font-size: 17px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-pointer-events: all;
-}
+    &.active {
+      color: var(--black, #191b1c);
+      text-align: center;
+      font-size: 17px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      pointer-events: all;
+    }
 
-&.choice_room{
-    border-radius: 10px;
-border: 1px solid var(--red, #FF5248);
-background: linear-gradient(0deg, rgba(255, 82, 72, 0.06) 0%, rgba(255, 82, 72, 0.06) 100%), #FFF;
-}
+    &.choice_room {
+      border-radius: 10px;
+      border: 1px solid var(--red, #ff5248);
+      background: linear-gradient(
+          0deg,
+          rgba(255, 82, 72, 0.06) 0%,
+          rgba(255, 82, 72, 0.06) 100%
+        ),
+        #fff;
+    }
   }
 }
-.page_popup_rooms_title{
-    color: var(--black, #191B1C);
-text-align: center;
+.page_popup_rooms_title {
+  color: var(--black, #191b1c);
+  text-align: center;
   font-family: "tildasans bold", sans-serif;
 
-font-size: 20px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+.calendar-tile-disabled {
+  background: none !important;
+  opacity: 0.3;
+  pointer-events: none;
 }
