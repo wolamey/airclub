@@ -255,6 +255,8 @@ export default function Booking({ refreshToken }) {
         <div className="tobook_locations">
           <p className="tobook_locations_prev">Локации</p>
           <div className="tobook_locations_wrapper">
+            <div className="tobook_locations_wrapper_inner">
+
             {locationList.length > 0 ? (
               locationList.map((loc) => (
                 <div
@@ -274,6 +276,8 @@ export default function Booking({ refreshToken }) {
             ) : (
               <Loader isFull={false} />
             )}
+            </div>
+
           </div>
         </div>
 

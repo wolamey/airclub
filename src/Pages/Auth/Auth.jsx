@@ -95,11 +95,11 @@ export default function Auth() {
               />
               <p className="auth_popup_container_title">{errorMessage}</p>
               <p className="auth_popup_container_text">
-                Повторите попытку или обратитесь к администратору системы
+               Повторите попытку или обратитесь в
               </p>
 
-              <a href="" className="auth_popup_container_link">
-                (контакт отвественного)
+              <a href="https://myteam.aeroclub.ru/servicedesk/customer/portal/21/create/204" className="auth_popup_container_link">
+                Service Desk 
               </a>
             </div>
           </div>
