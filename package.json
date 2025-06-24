@@ -2,13 +2,13 @@
   "name": "airclub",
   "private": true,
   "version": "0.1.0",
-"homepage": "https://wolamey.github.io/airclub",
+  "homepage": "https://wolamey.github.io/airclub",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "start": "vite",
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -19,6 +19,7 @@
     "react-calendar": "^6.0.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.1",
+    "react-zoom-pan-pinch": "^3.7.0",
     "three-dots": "^0.3.2"
   },
   "devDependencies": {

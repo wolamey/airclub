@@ -33,15 +33,15 @@
         min-height: 0; // Позволяет работать `overflow`
         overflow-y: auto; // Прокрутка только если контент выходит за границы
         border: 1px solid #f7f7f7;
-     
-.tobook_locations_wrapper_inner{
-        background: #f7f7f7;
-        border-radius: 22px;
-        padding: 12px;
-   display: flex;
-        flex-direction: column;
-        gap: 8px;
-}
+
+        .tobook_locations_wrapper_inner {
+          background: #f7f7f7;
+          border-radius: 22px;
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
         .tobook_location_item {
           display: flex;
           padding: 14px 16px;
@@ -56,6 +56,10 @@
           border: 1px solid rgba(0, 0, 0, 0);
           &.active {
             color: #191b1c;
+          }
+          &.occupied {
+            opacity: 0.5;
+            pointer-events: none;
           }
           &.location_chosen {
             border-radius: 10px;

@@ -8,6 +8,7 @@ import BookedSucces from "../../Components/BookedSucces/BookedSucces";
 import BookingFields from "../../Components/BookingFields/BookingFields";
 import Loader from "../../Components/Loader/Loader";
 import ShowError from "../../Components/ShowError/ShowError";
+import ShowImg from "../../Components/ShowImg/ShowImg";
 
 export default function Booking({ refreshToken }) {
   // --- состояние ---
@@ -32,6 +33,10 @@ export default function Booking({ refreshToken }) {
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [schemeImageUrl, setSchemeImageUrl] = useState("");
+  const [schemeLocationName, setSchemeLocationName] = useState("");
+  const [locationInfos, setLocationInfos] = useState([]);
+  const [showSchemePopup, setShowSchemePopup] = useState(false);
 
   useEffect(() => {
     const tg = window.Telegram.WebApp;
@@ -71,6 +76,7 @@ export default function Booking({ refreshToken }) {
     const json = await resp.json();
     const locations = json?.data?.locations ?? [];
     setLocationList(Array.isArray(locations) ? locations : []);
+    console.log(locations);
   };
 
   useEffect(() => {
@@ -139,17 +145,20 @@ export default function Booking({ refreshToken }) {
       if (token) return fetchRooms(locationId, dateIso);
     }
     if (!resp.ok) throw new Error(resp.status);
+    console.log(resp);
 
     const json = await resp.json();
     const places = json?.data?.locationPlaces ?? [];
     const mapped = places.map((p) => ({
       placeId: p.id,
       num: p.name,
-      isBusy: p.status !== "free",
+      isBusy: p.status ,
     }));
+    mapped[2].isBusy = 'Occupied'
     setRooms(mapped);
     setIsRoomsLoading(false);
     setLoading(false);
+    console.log(mapped);
   };
 
   const openRoomPopup = () => {
@@ -246,6 +255,38 @@ export default function Booking({ refreshToken }) {
     }
   };
 
+const fetchLocationInfos = async () => {
+    let token = getCookie("access_token") || (await refreshToken());
+    if (!token) return;
+    const resp = await fetch("https://beta-seathub.aeroclub.ru/Booking/location_infos", {
+      headers: { Accept: "text/plain", Authorization: `Bearer ${token}` },
+    });
+    if (resp.status === 401) {
+      token = await refreshToken();
+      if (token) return fetchLocationInfos();
+    }
+    if (resp.ok) {
+      const json = await resp.json();
+      setLocationInfos(json.data.locationInfos);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocationInfos();
+  }, []);
+
+     const handleShowScheme = (locId, locName) => {
+    const info = locationInfos.find((li) => li.locationId === locId);
+    setSchemeImageUrl(info?.imageUrl || "");
+    setSchemeLocationName(locName);
+    setShowSchemePopup(true);
+  };
+
+  const handleCloseScheme = () => {
+    setShowSchemePopup(false);
+    setSchemeImageUrl("");
+    setSchemeLocationName("");
+  };
   return (
     <div className="tobook">
       {loading && <Loader isFull={true} />}
@@ -256,31 +297,40 @@ export default function Booking({ refreshToken }) {
           <p className="tobook_locations_prev">Локации</p>
           <div className="tobook_locations_wrapper">
             <div className="tobook_locations_wrapper_inner">
+              {locationList.length > 0 ? (
+                locationList.map((loc) => (
+                  <div
+                    key={loc.id}
+                    className={`tobook_location_item ${
+                      !loc.isDisabled ? "active" : ""
+                    } ${
+                      selectedLocation?.id === loc.id ? "location_chosen" : ""
+                    }`}
+                    onClick={() =>{
 
-            {locationList.length > 0 ? (
-              locationList.map((loc) => (
-                <div
-                  key={loc.id}
-                  className={`tobook_location_item ${
-                    !loc.isDisabled ? "active" : ""
-                  } ${
-                    selectedLocation?.id === loc.id ? "location_chosen" : ""
-                  }`}
-                  onClick={() =>
-                    !loc.isDisabled && handleLocationSelection(loc)
-                  }
-                >
-                  {loc.name}
-                </div>
-              ))
-            ) : (
-              <Loader isFull={false} />
-            )}
+                      !loc.isDisabled && handleLocationSelection(loc);
+                      handleShowScheme(loc.id, loc.name)
+                    }
+                    }
+                  >
+                    {loc.name}
+                  </div>
+                ))
+              ) : (
+                <Loader isFull={false} />
+              )}
             </div>
-
           </div>
         </div>
+        {showSchemePopup && (
+          <ShowImg
+         
 
+            imageUrl={schemeImageUrl}
+          locationName={schemeLocationName}
+          closeScheme={handleCloseScheme}
+          />
+        )}
         <div
           className="tobook_input_outer"
           onClick={() => setIsCalendarOpen(true)}
@@ -361,11 +411,11 @@ export default function Booking({ refreshToken }) {
                     <div
                       key={i}
                       className={`page_popup_rooms_item ${
-                        r.isBusy ? "" : "active"
+                        r.isBusy === 'Occupied' ? "occupied" : "active"
                       } ${
                         selectedRoom?.placeId === r.placeId ? "choice_room" : ""
                       }`}
-                      onClick={() => !r.isBusy && setSelectedRoom(r)}
+                      onClick={() => r.isBusy === 'free'   && setSelectedRoom(r)}
                     >
                       {r.num}
                     </div>

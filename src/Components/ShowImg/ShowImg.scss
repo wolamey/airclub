@@ -1,11 +1,31 @@
-.showImg{
-    max-width: 600px;
-    max-height: 90vh;
-    padding: 20px 12px;
-    .imgscheme{
-        width: 100%;
-    }
-    .loc{
-        color: #1B151566;
-    }
+.showImg {
+  max-width: 600px;
+  max-height: 90vh;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .img-wrapper {
+    flex-grow: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pinch-zoom;
+  }
+
+  .imgscheme {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  }
+
+  .loc {
+    color: #1B151566;
+  }
+}
+
+
+.page_popup_img_show *{
+    transition: none;
 }

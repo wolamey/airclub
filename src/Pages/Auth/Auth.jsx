@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import closeSquare from "../../assets/close-square.svg";
 import "./Auth.scss";
-
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import imageUrl from "../../assets/img.jpg";
 export default function Auth() {
   const [popState, setPopState] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -30,13 +31,16 @@ export default function Auth() {
     formData.append("client_id", "SeatHub.Api");
 
     try {
-      const response = await fetch("https://dev-passport.aeroclub.ru/connect/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
+      const response = await fetch(
+        "https://dev-passport.aeroclub.ru/connect/token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formData.toString(),
+        }
+      );
 
       const data = await response.json();
       console.log("Server Response:", data);
@@ -44,7 +48,7 @@ export default function Auth() {
       if (data.access_token && data.refresh_token) {
         setCookie("access_token", data.access_token, 1);
         setCookie("refresh_token", data.refresh_token, 7);
-         setCookie("user_email", login, 7);
+        setCookie("user_email", login, 7);
         navigate("/");
       } else {
         setErrorMessage("Данные не верные");
@@ -95,11 +99,14 @@ export default function Auth() {
               />
               <p className="auth_popup_container_title">{errorMessage}</p>
               <p className="auth_popup_container_text">
-               Повторите попытку или обратитесь в
+                Повторите попытку или обратитесь в
               </p>
 
-              <a href="https://myteam.aeroclub.ru/servicedesk/customer/portal/21/create/204" className="auth_popup_container_link">
-                Service Desk 
+              <a
+                href="https://myteam.aeroclub.ru/servicedesk/customer/portal/21/create/204"
+                className="auth_popup_container_link"
+              >
+                Service Desk
               </a>
             </div>
           </div>
