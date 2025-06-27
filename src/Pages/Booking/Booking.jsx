@@ -38,6 +38,8 @@ export default function Booking({ refreshToken }) {
   const [locationInfos, setLocationInfos] = useState([]);
   const [showSchemePopup, setShowSchemePopup] = useState(false);
 
+  const [previewData, setPreviewData] = useState({id: null, name:''})
+
   useEffect(() => {
     const tg = window.Telegram.WebApp;
     tg.BackButton.show();
@@ -307,9 +309,8 @@ const fetchLocationInfos = async () => {
                       selectedLocation?.id === loc.id ? "location_chosen" : ""
                     }`}
                     onClick={() =>{
-
+setPreviewData({'id':loc.id, 'name': loc.name})
                       !loc.isDisabled && handleLocationSelection(loc);
-                      handleShowScheme(loc.id, loc.name)
                     }
                     }
                   >
@@ -320,7 +321,17 @@ const fetchLocationInfos = async () => {
                 <Loader isFull={false} />
               )}
             </div>
+
+          
           </div>
+            {
+              previewData.id &&(
+                <button className="button rbutton preview_button" onClick={()=>{
+                      handleShowScheme(previewData.id, previewData.name)
+
+                }}>Предпросмотр схемы</button>
+              )
+            }
         </div>
         {showSchemePopup && (
           <ShowImg
@@ -411,7 +422,7 @@ const fetchLocationInfos = async () => {
                     <div
                       key={i}
                       className={`page_popup_rooms_item ${
-                        r.isBusy === 'Occupied' ? "occupied" : "active"
+                        r.isBusy === 'Occupied' ? "occupied" : r.isBusy === 'occupiedByUser' ? 'occupiedByUser' : "active"
                       } ${
                         selectedRoom?.placeId === r.placeId ? "choice_room" : ""
                       }`}

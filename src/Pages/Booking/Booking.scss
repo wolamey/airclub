@@ -61,6 +61,11 @@
             opacity: 0.5;
             pointer-events: none;
           }
+          &.occupiedByUser{
+            pointer-events: none;
+            background: #fff5f4;
+
+          }
           &.location_chosen {
             border-radius: 10px;
             border: 1px solid var(--red, #ff5248);
@@ -327,4 +332,9 @@
   background: none !important;
   opacity: 0.3;
   pointer-events: none;
+}
+
+.preview_button{
+  margin: 10px auto 0 auto !important;
+  display: block;
 }
