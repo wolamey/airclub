@@ -26,6 +26,7 @@ export default function Auth() {
       
         setErrorMessage('Telegram username не найден');
         setPopState(true);
+
       }
     }
   }, []);
