@@ -7,28 +7,24 @@ export default function Auth() {
   const [step, setStep] = useState(1);
   const [popState, setPopState] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [validationCode, setValidationCode] = useState("");
+  const [telegramAccount, setTelegramAccount] = useState("");
   const navigate = useNavigate();
- const [telegramAccount, setTelegramAccount] = useState("");
+
+  const API = "https://beta-seathub.aeroclub.ru/User";
 
   useEffect(() => {
-    // Telegram WebApp SDK
     const tg = window.Telegram?.WebApp;
     if (tg) {
-      // Разрешаем WebApp крутиться
       tg.ready();
-      // Берём небезопасные данные, там есть user.username
       const user = tg.initDataUnsafe?.user;
       if (user?.username) {
         setTelegramAccount(user.username);
       }
     }
   }, []);
-  const API = "https://beta-seathub.aeroclub.ru/User";
 
-  // Helpers для куки
   const setCookie = (name, value, days) => {
     let expires = "";
     if (days) {
@@ -38,12 +34,12 @@ export default function Auth() {
     }
     document.cookie = `${name}=${value}${expires}; path=/`;
   };
+
   const getCookie = (name) => {
     const m = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
     return m ? m[2] : null;
   };
 
-  // Универсальный fetch с проверкой статуса и JSON-парсером
   const safeFetch = async (url, opts) => {
     const res = await fetch(url, opts);
     if (!res.ok) {
@@ -53,53 +49,41 @@ export default function Auth() {
     return res.json();
   };
 
-  // 1. Логин + получение токенов + проверка домена + отправка кода
-  const handleLoginSubmit = async (e) => {
+  // Шаг 1: логинимся фиксированным пользователем и отправляем код
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+
     try {
-      // 1.1. Стандартный OAuth-парольный поток
       const tokenRes = await safeFetch(
         "https://dev-passport.aeroclub.ru/connect/token",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            username: login,
-            password: password,
+            username: "seatmap@aeroclub.ru",
+            password: "allcdOeSunZa",
             grant_type: "password",
             client_id: "SeatHub.Api",
-          }).toString(),
+          }),
         }
       );
-      // 1.2. Сохраняем куки
+
       setCookie("access_token", tokenRes.access_token, 1);
       setCookie("refresh_token", tokenRes.refresh_token, 7);
-      setCookie("user_email", login, 7);
 
-      // 1.3. Проверяем домен пользователя
-      const domain = login.split("@")[1];
- const token = getCookie("access_token");
+      await safeFetch(`${API}/send_validation_code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenRes.access_token}`,
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          telegramAccount: telegramAccount || "unknown",
+        }),
+      });
 
-const domRes = await safeFetch(
-  `${API}/is_domain_allowed?domain=${encodeURIComponent(domain)}`,
-  {
-    method: "GET",
-    headers: {
-      // важный момент!
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-
-      if (!domRes.data.isAllowed) {
-        throw new Error("Email-домен не разрешён для входа");
-      }
-
-      // 1.4. Шлём код подтверждения
-      await sendValidationCode();
-
-      // Переходим на шаг 2
       setStep(2);
     } catch (err) {
       setErrorMessage(err.message);
@@ -107,31 +91,14 @@ const domRes = await safeFetch(
     }
   };
 
-  // 2. Отправка кода подтверждения
-  const sendValidationCode = async () => {
-    const token = getCookie("access_token");
-    await safeFetch(`${API}/send_validation_code`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        // email: login,
-        email: 'vitaliy.tiller@aeroclub.ru',
-        // telegramAccount: "soplya11111111", 
-        telegramAccount
-      }),
-    });
-  };
-
-  // 3. Подтверждение кода
+  // Шаг 2: проверяем код
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+
     try {
       const token = getCookie("access_token");
-      const validateRes = await safeFetch(`${API}/validate_code`, {
+      const res = await safeFetch(`${API}/validate_code`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,13 +106,11 @@ const domRes = await safeFetch(
         },
         body: JSON.stringify({
           validationCode,
-          // telegramAccount: "soplya11111111",
-          telegramAccount
+          telegramAccount: telegramAccount || "unknown",
         }),
       });
 
-      // Успех! Обновим email по тому, что вернул сервер (если нужно)
-      setCookie("user_email", validateRes.data.email, 7);
+      setCookie("user_email", res.data.email || userEmail, 7);
       navigate("/");
     } catch (err) {
       setErrorMessage(err.message);
@@ -183,28 +148,20 @@ const domRes = await safeFetch(
     <div className="auth">
       {step === 1 && (
         <>
-          <p className="title auth_title">Авторизация</p>
-          <form className="auth_form" onSubmit={handleLoginSubmit}>
+          <p className="title auth_title">Введите ваш email</p>
+          <form className="auth_form" onSubmit={handleEmailSubmit}>
             <input
-              type="text"
-              placeholder="Логин (email)"
+              type="email"
+              placeholder="Ваш email"
               className="input auth_input"
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Пароль"
-              className="input auth_input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
               required
             />
             <input
               type="submit"
               className="rbutton button auth_submit"
-              value="Войти"
+              value="Отправить код"
             />
           </form>
         </>
@@ -212,11 +169,11 @@ const domRes = await safeFetch(
 
       {step === 2 && (
         <>
-          <p className="title auth_title">Проверочный код</p>
+          <p className="title auth_title">Код из письма</p>
           <form className="auth_form" onSubmit={handleCodeSubmit}>
             <input
               type="text"
-              placeholder="Код из письма"
+              placeholder="Введите код"
               className="input auth_input"
               value={validationCode}
               onChange={(e) => setValidationCode(e.target.value)}
