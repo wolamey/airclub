@@ -22,6 +22,11 @@ export default function Auth() {
       if (user?.username) {
         setTelegramAccount(user.username);
       }
+      else{
+      
+        setErrorMessage('Telegram username не найден');
+        setPopState(true);
+      }
     }
   }, []);
 
@@ -80,7 +85,7 @@ export default function Auth() {
         },
         body: JSON.stringify({
           email: userEmail,
-          telegramAccount: telegramAccount || "unknown",
+          telegramAccount: telegramAccount || "unknown_username",
         }),
       });
 
@@ -92,7 +97,7 @@ export default function Auth() {
   };
 
   // Шаг 2: проверяем код
-  const handleCodeSubmit = async (e) => {
+   const handleCodeSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
 
@@ -106,13 +111,14 @@ export default function Auth() {
         },
         body: JSON.stringify({
           validationCode,
-          telegramAccount: telegramAccount || "unknown",
+          telegramAccount: telegramAccount || "unknown_username",
         }),
       });
-
+  // Только при успешной валидации переходим на главную
       setCookie("user_email", res.data.email || userEmail, 7);
       navigate("/");
     } catch (err) {
+      console.log(err)
       setErrorMessage(err.message);
       setPopState(true);
     }
