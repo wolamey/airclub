@@ -1,3 +1,4 @@
+// src/App.jsx
 import { useEffect } from "react";
 import "./App.scss";
 import { useNavigate, Route, Routes } from "react-router-dom";
@@ -5,10 +6,10 @@ import Auth from "../Pages/Auth/Auth";
 import Booking from "../Pages/Booking/Booking";
 import MyBooking from "../Pages/MyBooking/MyBooking";
 
+// Cookie utilities
 const getCookie = (name) => {
-  const cookies = document.cookie.split("; ");
-  const cookie = cookies.find((row) => row.startsWith(`${name}=`));
-  return cookie ? cookie.split("=")[1] : null;
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? match[2] : null;
 };
 
 const setCookie = (name, value, days) => {
@@ -16,6 +17,7 @@ const setCookie = (name, value, days) => {
   document.cookie = `${name}=${value}; expires=${expires}; path=/`;
 };
 
+// Fetch new tokens
 const fetchToken = async () => {
   try {
     const res = await fetch("https://dev-passport.aeroclub.ru/connect/token", {
@@ -28,26 +30,22 @@ const fetchToken = async () => {
         client_id: "SeatHub.Api",
       }),
     });
-
     const data = await res.json();
-      console.log(data)
-
     if (data.access_token) {
       setCookie("access_token", data.access_token, 1);
       setCookie("refresh_token", data.refresh_token, 7);
-      console.log(data)
       return data.access_token;
     }
   } catch (err) {
-    console.error("Ошибка получения токена:", err);
+    console.error("Error fetching token:", err);
   }
   return null;
 };
 
-const refreshToken = async () => {
-  const refreshToken = getCookie("refresh_token");
-  if (!refreshToken) return null;
-
+// Refresh token if expired
+export const refreshToken = async () => {
+  const refresh = getCookie("refresh_token");
+  if (!refresh) return null;
   try {
     const res = await fetch("https://dev-passport.aeroclub.ru/connect/token", {
       method: "POST",
@@ -55,46 +53,39 @@ const refreshToken = async () => {
       body: new URLSearchParams({
         grant_type: "refresh_token",
         client_id: "SeatHub.Api",
-        refresh_token: refreshToken,
+        refresh_token: refresh,
       }),
     });
-
     const data = await res.json();
     if (data.access_token) {
       setCookie("access_token", data.access_token, 1);
-      if (data.refresh_token) {
-        setCookie("refresh_token", data.refresh_token, 7);
-      }
+      if (data.refresh_token) setCookie("refresh_token", data.refresh_token, 7);
       return data.access_token;
     }
   } catch (err) {
-    console.error("Ошибка обновления токена:", err);
+    console.error("Error refreshing token:", err);
   }
   return null;
 };
 
+// Check if telegram user is allowed (has passed email validation)
 const isDomainAllowed = async (username, token) => {
-  console.log(username)
-  console.log(token)
   try {
     const res = await fetch(
-      `https://beta-seathub.aeroclub.ru/User/user_email?TelegramAccount=${username}`,
+      `https://beta-seathub.aeroclub.ru/User/user_email?TelegramAccount=${encodeURIComponent(username)}`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "text/plain",
-        },
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       }
     );
-
-    if (res.status === 200) {
-      const data = await res.json();
-      setCookie('user_email',data.data.email )
-      console.log(data.data.email)
-      return true;
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data?.email) {
+        setCookie("user_email", json.data.email, 7);
+        return true;
+      }
     }
   } catch (err) {
-    console.error("Ошибка проверки юзернейма:", err);
+    console.error("Error checking domain:", err);
   }
   return false;
 };
@@ -103,41 +94,36 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const init = async () => {
+    const initAuth = async () => {
       const tg = window.Telegram?.WebApp;
-      // const username = 'unknown_username';
       const username = tg?.initDataUnsafe?.user?.username;
+      // const username = 'so';
 
       if (!username) {
-        console.warn("Telegram username не найден");
-        navigate("/auth");
+        console.warn("Telegram username not found");
+        navigate("/auth", { replace: true });
         return;
       }
 
       let token = getCookie("access_token");
-      if (!token) {
-        token = await fetchToken();
-      }
+      if (!token) token = await fetchToken();
 
       if (!token) {
-        navigate("/auth");
+        navigate("/auth", { replace: true });
         return;
       }
 
       const allowed = await isDomainAllowed(username, token);
-
-      if (!allowed) {
-        console.log(allowed)
-        navigate("/");
+      if (allowed  ) {
+        // alert('sosi')
+        // navigate("/", { replace: true });
       } else {
-        console.log(allowed)
-
-        navigate("/auth");
+        navigate("/auth", { replace: true });
       }
     };
 
-    init();
-  }, []);
+    initAuth();
+  }, [navigate]);
 
   return (
     <div className="app">

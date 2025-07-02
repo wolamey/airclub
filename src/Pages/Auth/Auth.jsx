@@ -1,3 +1,5 @@
+
+// src/Pages/Auth/Auth.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import closeSquare from "../../assets/close-square.svg";
@@ -5,47 +7,26 @@ import "./Auth.scss";
 
 export default function Auth() {
   const [step, setStep] = useState(1);
-  const [popState, setPopState] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [validationCode, setValidationCode] = useState("");
   const [telegramAccount, setTelegramAccount] = useState("");
   const navigate = useNavigate();
-
   const API = "https://beta-seathub.aeroclub.ru/User";
 
-  useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      const user = tg.initDataUnsafe?.user;
-      if (user?.username) {
-        setTelegramAccount(user.username);
-      }
-      else{
-      
-        setErrorMessage('Telegram username не найден');
-        setPopState(true);
-
-      }
-    }
-  }, []);
-
+  // Reuse cookie utils
   const setCookie = (name, value, days) => {
-    let expires = "";
-    if (days) {
-      const d = new Date();
-      d.setTime(d.getTime() + days * 86400 * 1000);
-      expires = "; expires=" + d.toUTCString();
-    }
+    const expires = days
+      ? "; expires=" + new Date(Date.now() + days * 864e5).toUTCString()
+      : "";
     document.cookie = `${name}=${value}${expires}; path=/`;
   };
-
   const getCookie = (name) => {
-    const m = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-    return m ? m[2] : null;
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? match[2] : null;
   };
 
+  // Unified fetch with error handling
   const safeFetch = async (url, opts) => {
     const res = await fetch(url, opts);
     if (!res.ok) {
@@ -55,7 +36,20 @@ export default function Auth() {
     return res.json();
   };
 
-  // Шаг 1: логинимся фиксированным пользователем и отправляем код
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      const username = tg.initDataUnsafe?.user?.username;
+      // const username = 'so';
+      if (username) setTelegramAccount(username);
+      else {
+        setErrorMessage("Telegram username не найден");
+      }
+    }
+  }, []);
+
+  // Step 1: send validation code
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
@@ -84,24 +78,26 @@ export default function Auth() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${tokenRes.access_token}`,
         },
-        body: JSON.stringify({
-          email: userEmail,
-          telegramAccount: telegramAccount || "unknown_username",
-        }),
+        body: JSON.stringify({ email: userEmail, telegramAccount }),
       });
 
       setStep(2);
     } catch (err) {
-      setErrorMessage(err.message);
-      setPopState(true);
+      console.log(err);
+
+  const match = err.message.match(/"error"\s*:\s*"([^"]+)"/);
+  if (match && match[1]) {
+    setErrorMessage(match[1]);
+  } else {
+    setErrorMessage(err.message);
+  }
     }
   };
 
-  // Шаг 2: проверяем код
-   const handleCodeSubmit = async (e) => {
+  // Step 2: verify code and navigate
+  const handleCodeSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
-
     try {
       const token = getCookie("access_token");
       const res = await safeFetch(`${API}/validate_code`, {
@@ -110,46 +106,15 @@ export default function Auth() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          validationCode,
-          telegramAccount: telegramAccount || "unknown_username",
-        }),
+        body: JSON.stringify({ validationCode, telegramAccount }),
       });
-  // Только при успешной валидации переходим на главную
+
       setCookie("user_email", res.data.email || userEmail, 7);
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (err) {
-      console.log(err)
       setErrorMessage(err.message);
-      setPopState(true);
     }
   };
-
-  const renderPopup = () =>
-    popState && (
-      <div className="page_popup">
-        <div className="auth_popup_container">
-          <div className="auth_popup_wrapper">
-            <img
-              src={closeSquare}
-              className="auth_popup_container_img"
-              alt="close"
-              onClick={() => setPopState(false)}
-            />
-            <p className="auth_popup_container_title">{errorMessage}</p>
-            <p className="auth_popup_container_text">
-              Повторите попытку или обратитесь в
-            </p>
-            <a
-              href="https://myteam.aeroclub.ru/servicedesk/customer/portal/21/create/204"
-              className="auth_popup_container_link"
-            >
-              Service Desk
-            </a>
-          </div>
-        </div>
-      </div>
-    );
 
   return (
     <div className="auth">
@@ -165,15 +130,12 @@ export default function Auth() {
               onChange={(e) => setUserEmail(e.target.value)}
               required
             />
-            <input
-              type="submit"
-              className="rbutton button auth_submit"
-              value="Отправить код"
-            />
+            <button type="submit" className="rbutton button auth_submit">
+              Получить код
+            </button>
           </form>
         </>
       )}
-
       {step === 2 && (
         <>
           <p className="title auth_title">Код из письма</p>
@@ -186,16 +148,35 @@ export default function Auth() {
               onChange={(e) => setValidationCode(e.target.value)}
               required
             />
-            <input
-              type="submit"
-              className="rbutton button auth_submit"
-              value="Подтвердить"
-            />
+            <button type="submit" className="rbutton button auth_submit">
+              Подтвердить
+            </button>
           </form>
         </>
       )}
-
-      {renderPopup()}
+      {errorMessage && (
+        <div className="page_popup">
+          <div className="auth_popup_container">
+            <div className="auth_popup_wrapper">
+              <img
+                src={closeSquare}
+                alt="close"
+                onClick={() => setErrorMessage("")}
+              />
+              <p className="auth_popup_container_title">{errorMessage}</p>
+              <p className="auth_popup_container_text">
+              Повторите попытку или обратитесь в
+            </p>
+            <a
+              href="https://myteam.aeroclub.ru/servicedesk/customer/portal/21/create/204"
+              className="auth_popup_container_link"
+            >
+              Service Desk
+            </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
