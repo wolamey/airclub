@@ -126,7 +126,7 @@ function App() {
 
       const allowed = await isDomainAllowed(username, token);
 
-      if (allowed) {
+      if (!allowed) {
         console.log(allowed)
         navigate("/");
       } else {
