@@ -128,8 +128,7 @@ export default function Booking({ refreshToken }) {
     }
     const userEmail = getCookie("user_email");
     const params = new URLSearchParams({
-      // UserEmail: userEmail,
-      UserEmail: "Vadim.Koshelev@aeroclub.ru",
+      UserEmail: userEmail,
       LocationId: locationId,
       Date: dateIso,
     });
@@ -196,7 +195,7 @@ export default function Booking({ refreshToken }) {
 
     const userEmail = getCookie("user_email");
     const body = {
-      userEmail: "Vadim.Koshelev@aeroclub.ru",
+      userEmail: userEmail,
       locationPlaceId: selectedRoom.placeId,
       date: selectedDate.toISOString(),
       deleteExistedBooking: false,

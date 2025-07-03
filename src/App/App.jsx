@@ -97,7 +97,7 @@ function App() {
     const initAuth = async () => {
       const tg = window.Telegram?.WebApp;
       const username = tg?.initDataUnsafe?.user?.username;
-      // const username = 'so';
+      // const username = 'soo';
 
       if (!username) {
         console.warn("Telegram username not found");

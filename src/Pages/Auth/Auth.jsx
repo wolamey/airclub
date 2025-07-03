@@ -41,7 +41,8 @@ export default function Auth() {
     if (tg) {
       tg.ready();
       const username = tg.initDataUnsafe?.user?.username;
-      // const username = 'so';
+      // const username = 'soo';
+
       if (username) setTelegramAccount(username);
       else {
         setErrorMessage("Telegram username не найден");
@@ -112,8 +113,12 @@ export default function Auth() {
       setCookie("user_email", res.data.email || userEmail, 7);
       navigate("/", { replace: true });
     } catch (err) {
-      setErrorMessage(err.message);
-    }
+ const match = err.message.match(/"error"\s*:\s*"([^"]+)"/);
+  if (match && match[1]) {
+    setErrorMessage(match[1]);
+  } else {
+    setErrorMessage(err.message);
+  }    }
   };
 
   return (

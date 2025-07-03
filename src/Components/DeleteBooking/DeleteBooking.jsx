@@ -14,7 +14,7 @@ export default function DeleteBooking({
     const userEmail = getCookie("user_email") || "Vadim.Koshelev@aeroclub.ru";
     const params = new URLSearchParams({
       BookingId: id,
-      UserEmail: "Vadim.Koshelev@aeroclub.ru",
+      UserEmail: userEmail,
     });
     const token = getCookie("access_token") || (await refreshToken());
     const resp = await fetch(

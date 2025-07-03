@@ -37,9 +37,9 @@ export default function MyBooking({ refreshToken }) {
       return;
     }
 
-    const userEmail = getCookie("user_email") || "Vadim.Koshelev@aeroclub.ru";
+    const userEmail = getCookie("user_email") ;
     const params = new URLSearchParams({
-      UserEmail: "Vadim.Koshelev@aeroclub.ru",
+      UserEmail: userEmail,
     });
     const resp = await fetch(
       `https://beta-seathub.aeroclub.ru/Booking/bookings?${params}`,
