@@ -11,7 +11,7 @@ export default function DeleteBooking({
   const [loading, setLoading] =useState(false)
   const handleDelete = async (id) => {
     setLoading(true)
-    const userEmail = getCookie("user_email") || "Vadim.Koshelev@aeroclub.ru";
+    const userEmail = getCookie("user_email");
     const params = new URLSearchParams({
       BookingId: id,
       UserEmail: userEmail,
