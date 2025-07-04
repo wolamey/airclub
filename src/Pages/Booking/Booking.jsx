@@ -37,6 +37,7 @@ export default function Booking({ refreshToken }) {
   const [schemeLocationName, setSchemeLocationName] = useState("");
   const [locationInfos, setLocationInfos] = useState([]);
   const [showSchemePopup, setShowSchemePopup] = useState(false);
+  const [isAllbusy, setIsAllbusy] = useState(false);
 
   const [previewData, setPreviewData] = useState({ id: null, name: "" });
 
@@ -164,6 +165,10 @@ export default function Booking({ refreshToken }) {
     setRooms(mapped);
     setIsRoomsLoading(false);
     setLoading(false);
+
+    const allBusy = mapped.every((room) => room.isBusy !== "free");
+    setIsAllbusy(allBusy);
+
     console.log(mapped);
   };
 
@@ -442,12 +447,17 @@ export default function Booking({ refreshToken }) {
                 )}
               </div>
               <div className="tobook_date_buttons_wrapper">
-                <button
-                  className="button rbutton tobook_pick_date_button"
-                  onClick={handleConfirmRoom}
-                >
-                  Выбрать
-                </button>
+                {isAllbusy ? (
+                  <p>Свободных мест нет</p>
+                ) : (
+                  <button
+                    className="button rbutton tobook_pick_date_button"
+                    onClick={handleConfirmRoom}
+                  >
+                    Выбрать
+                  </button>
+                )}
+
                 <button
                   className="button tobook_decline_date_button"
                   onClick={() => setIsRoomPopupOpen(false)}

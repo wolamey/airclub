@@ -29,7 +29,7 @@
       }
 
       .tobook_locations_wrapper {
-        // flex-grow: 1; 
+        // flex-grow: 1;
         min-height: 0; // Позволяет работать `overflow`
         overflow-y: auto; // Прокрутка только если контент выходит за границы
         border: 1px solid #f7f7f7;
@@ -61,11 +61,7 @@
             opacity: 0.5;
             pointer-events: none;
           }
-          &.occupiedByUser{
-            pointer-events: none;
-            background: #fff5f4;
 
-          }
           &.location_chosen {
             border-radius: 10px;
             border: 1px solid var(--red, #ff5248);
@@ -74,7 +70,11 @@
         }
       }
     }
-
+    .occupiedByUser {
+      pointer-events: none;
+      background: #fcd6d2;
+      color: black;
+    }
     .tobook_input_outer {
       position: relative;
       width: 100%;
@@ -334,11 +334,11 @@
   pointer-events: none;
 }
 
-.preview_button{
+.preview_button {
   margin: 10px auto 0 auto !important;
   display: block;
 }
-.gbutton{
+.gbutton {
   background: rgba(128, 128, 128, 0.195);
   color: black;
 }
