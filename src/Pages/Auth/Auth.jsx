@@ -1,4 +1,3 @@
-
 // src/Pages/Auth/Auth.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +12,15 @@ export default function Auth() {
   const [telegramAccount, setTelegramAccount] = useState("");
   const navigate = useNavigate();
   const API = "https://beta-seathub.aeroclub.ru/User";
+  useEffect(() => {
+    const savedStep = parseInt(localStorage.getItem("auth_step"), 10);
+    const savedEmail = localStorage.getItem("auth_email");
 
+    if (savedStep === 2 && savedEmail) {
+      setStep(2);
+      setUserEmail(savedEmail);
+    }
+  }, []);
   // Reuse cookie utils
   const setCookie = (name, value, days) => {
     const expires = days
@@ -41,7 +48,7 @@ export default function Auth() {
     if (tg) {
       tg.ready();
       const username = tg.initDataUnsafe?.user?.username;
-      // const username = 'soo';
+      // const username = "sopsop";
 
       if (username) setTelegramAccount(username);
       else {
@@ -86,14 +93,23 @@ export default function Auth() {
     } catch (err) {
       console.log(err);
 
-  const match = err.message.match(/"error"\s*:\s*"([^"]+)"/);
-  if (match && match[1]) {
-    setErrorMessage(match[1]);
-  } else {
-    setErrorMessage(err.message);
-  }
+      const match = err.message.match(/"error"\s*:\s*"([^"]+)"/);
+      if (match && match[1]) {
+        setErrorMessage(match[1]);
+      } else {
+        setErrorMessage(err.message);
+      }
     }
   };
+
+
+  useEffect(() => {
+    localStorage.setItem("auth_step", step);
+  }, [step]);
+
+  useEffect(() => {
+    localStorage.setItem("auth_email", userEmail);
+  }, [userEmail]);
 
   // Step 2: verify code and navigate
   const handleCodeSubmit = async (e) => {
@@ -109,16 +125,20 @@ export default function Auth() {
         },
         body: JSON.stringify({ validationCode, telegramAccount }),
       });
+setCookie("user_email", res.data.email || userEmail, 7);
+localStorage.removeItem("auth_step");
+localStorage.removeItem("auth_email");
 
       setCookie("user_email", res.data.email || userEmail, 7);
       navigate("/", { replace: true });
     } catch (err) {
- const match = err.message.match(/"error"\s*:\s*"([^"]+)"/);
-  if (match && match[1]) {
-    setErrorMessage(match[1]);
-  } else {
-    setErrorMessage(err.message);
-  }    }
+      const match = err.message.match(/"error"\s*:\s*"([^"]+)"/);
+      if (match && match[1]) {
+        setErrorMessage(match[1]);
+      } else {
+        setErrorMessage(err.message);
+      }
+    }
   };
 
   return (
@@ -170,14 +190,14 @@ export default function Auth() {
               />
               <p className="auth_popup_container_title">{errorMessage}</p>
               <p className="auth_popup_container_text">
-              Повторите попытку или обратитесь в
-            </p>
-            <a
-              href="https://myteam.aeroclub.ru/servicedesk/customer/portal/21/create/204"
-              className="auth_popup_container_link"
-            >
-              Service Desk
-            </a>
+                Повторите попытку или обратитесь в
+              </p>
+              <a
+                href="https://myteam.aeroclub.ru/servicedesk/customer/portal/21/create/204"
+                className="auth_popup_container_link"
+              >
+                Service Desk
+              </a>
             </div>
           </div>
         </div>

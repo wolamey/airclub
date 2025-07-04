@@ -1,7 +1,7 @@
 // src/App.jsx
 import { useEffect } from "react";
 import "./App.scss";
-import { useNavigate, Route, Routes } from "react-router-dom";
+import { useNavigate, Route, Routes, useLocation } from "react-router-dom";
 import Auth from "../Pages/Auth/Auth";
 import Booking from "../Pages/Booking/Booking";
 import MyBooking from "../Pages/MyBooking/MyBooking";
@@ -72,9 +72,14 @@ export const refreshToken = async () => {
 const isDomainAllowed = async (username, token) => {
   try {
     const res = await fetch(
-      `https://beta-seathub.aeroclub.ru/User/user_email?TelegramAccount=${encodeURIComponent(username)}`,
+      `https://beta-seathub.aeroclub.ru/User/user_email?TelegramAccount=${encodeURIComponent(
+        username
+      )}`,
       {
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
       }
     );
     if (res.ok) {
@@ -91,13 +96,14 @@ const isDomainAllowed = async (username, token) => {
 };
 
 function App() {
+  const location = useLocation();
   const navigate = useNavigate();
-
+  console.log(location.pathname);
   useEffect(() => {
     const initAuth = async () => {
       const tg = window.Telegram?.WebApp;
       const username = tg?.initDataUnsafe?.user?.username;
-      // const username = 'soo';
+      // const username ='sopsop';
 
       if (!username) {
         console.warn("Telegram username not found");
@@ -114,9 +120,10 @@ function App() {
       }
 
       const allowed = await isDomainAllowed(username, token);
-      if (allowed  ) {
-        // alert('sosi')
-        // navigate("/", { replace: true });
+      if (allowed) {
+        if (location.pathname === "/auth") {
+          navigate("/", { replace: true });
+        }
       } else {
         navigate("/auth", { replace: true });
       }
@@ -129,7 +136,10 @@ function App() {
     <div className="app">
       <Routes>
         <Route path="/auth" element={<Auth />} />
-        <Route path="/tobook" element={<Booking refreshToken={refreshToken} />} />
+        <Route
+          path="/tobook"
+          element={<Booking refreshToken={refreshToken} />}
+        />
         <Route path="/" element={<MyBooking refreshToken={refreshToken} />} />
       </Routes>
     </div>

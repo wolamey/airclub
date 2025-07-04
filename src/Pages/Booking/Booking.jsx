@@ -325,7 +325,7 @@ setPreviewData({'id':loc.id, 'name': loc.name})
           </div>
             {
               previewData.id &&(
-                <button className="button rbutton preview_button" onClick={()=>{
+                <button className="button gbutton preview_button" onClick={()=>{
                       handleShowScheme(previewData.id, previewData.name)
 
                 }}>Предпросмотр схемы</button>

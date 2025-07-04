@@ -19,7 +19,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      flex-grow: 1; // Занимает всё возможное пространство
+      // flex-grow: 1;
       min-height: 0; // Важно для правильного распределения высоты внутри flex-контейнера
 
       .tobook_locations_prev {
@@ -29,7 +29,7 @@
       }
 
       .tobook_locations_wrapper {
-        flex-grow: 1; // Занимает всё возможное место
+        // flex-grow: 1; 
         min-height: 0; // Позволяет работать `overflow`
         overflow-y: auto; // Прокрутка только если контент выходит за границы
         border: 1px solid #f7f7f7;
@@ -337,4 +337,7 @@
 .preview_button{
   margin: 10px auto 0 auto !important;
   display: block;
+}
+.gbutton{
+  background: rgba(128, 128, 128, 0.195);
 }
