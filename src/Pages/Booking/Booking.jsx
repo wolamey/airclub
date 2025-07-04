@@ -38,7 +38,7 @@ export default function Booking({ refreshToken }) {
   const [locationInfos, setLocationInfos] = useState([]);
   const [showSchemePopup, setShowSchemePopup] = useState(false);
   const [isAllbusy, setIsAllbusy] = useState(false);
-
+const [isAllmine, setIsAllmine]= useState(false);
   const [previewData, setPreviewData] = useState({ id: null, name: "" });
 
   useEffect(() => {
@@ -165,9 +165,11 @@ export default function Booking({ refreshToken }) {
     setRooms(mapped);
     setIsRoomsLoading(false);
     setLoading(false);
+const allBusy = mapped.every((room) => room.isBusy !== "free");
+setIsAllbusy(allBusy);
 
-    const allBusy = mapped.every((room) => room.isBusy !== "free");
-    setIsAllbusy(allBusy);
+const hasMine = mapped.some((room) => room.isBusy === "occupiedByUser");
+setIsAllmine(hasMine);
 
     console.log(mapped);
   };
@@ -449,7 +451,12 @@ export default function Booking({ refreshToken }) {
               <div className="tobook_date_buttons_wrapper">
                 {isAllbusy ? (
                   <p>Свободных мест нет</p>
-                ) : (
+                ) : 
+                isAllmine ? (
+                  <p>Уже есть бронь на эту дату</p>
+
+                ) :
+                (
                   <button
                     className="button rbutton tobook_pick_date_button"
                     onClick={handleConfirmRoom}
