@@ -47,8 +47,8 @@ export default function Auth() {
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
-      const username = tg.initDataUnsafe?.user?.username;
-      // const username = 'soplya';
+      // const username = tg.initDataUnsafe?.user?.username;
+      const username = 'soplya';
 
       if (username) setTelegramAccount(username);
       else {

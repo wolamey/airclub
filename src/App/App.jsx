@@ -102,8 +102,8 @@ function App() {
   useEffect(() => {
     const initAuth = async () => {
       const tg = window.Telegram?.WebApp;
-      const username = tg?.initDataUnsafe?.user?.username;
-      // const username ='soplya';
+      // const username = tg?.initDataUnsafe?.user?.username;
+      const username ='soplya';
 console.log('updated')
       if (!username) {
         console.warn("Telegram username not found");

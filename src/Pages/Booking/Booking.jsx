@@ -105,8 +105,15 @@ export default function Booking({ refreshToken }) {
       setIsCalendarOpen(false);
       setFormattedRoom("");
       setSelectedRoom(null);
+     
     }
   };
+
+  useEffect(() => {
+  if (selectedDate && isCalendarOpen === false) {
+    openRoomPopup();
+  }
+}, [selectedDate]);
 
   // --- выбор локации ---
   const handleLocationSelection = (loc) => {
