@@ -103,8 +103,8 @@ function App() {
     const initAuth = async () => {
       const tg = window.Telegram?.WebApp;
       const username = tg?.initDataUnsafe?.user?.username;
-      // const username ='sopsop';
-
+      // const username ='soplya';
+console.log('updated')
       if (!username) {
         console.warn("Telegram username not found");
         navigate("/auth", { replace: true });
@@ -130,7 +130,7 @@ function App() {
     };
 
     initAuth();
-  }, [navigate]);
+  }, [navigate,location,getCookie]);
 
   return (
     <div className="app">

@@ -48,7 +48,7 @@ export default function Auth() {
     if (tg) {
       tg.ready();
       const username = tg.initDataUnsafe?.user?.username;
-      // const username = "sopsop";
+      // const username = 'soplya';
 
       if (username) setTelegramAccount(username);
       else {

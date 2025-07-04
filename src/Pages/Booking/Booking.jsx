@@ -155,7 +155,6 @@ export default function Booking({ refreshToken }) {
       num: p.name,
       isBusy: p.status ,
     }));
-    mapped[2].isBusy = 'Occupied'
     setRooms(mapped);
     setIsRoomsLoading(false);
     setLoading(false);
@@ -421,7 +420,7 @@ setPreviewData({'id':loc.id, 'name': loc.name})
                     <div
                       key={i}
                       className={`page_popup_rooms_item ${
-                        r.isBusy === 'Occupied' ? "occupied" : r.isBusy === 'occupiedByUser' ? 'occupiedByUser' : "active"
+                        r.isBusy === 'occupied' ? "occupied" : r.isBusy === 'occupiedByUser' ? 'occupiedByUser' : "active"
                       } ${
                         selectedRoom?.placeId === r.placeId ? "choice_room" : ""
                       }`}
