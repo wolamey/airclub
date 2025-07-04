@@ -38,7 +38,7 @@ export default function Booking({ refreshToken }) {
   const [locationInfos, setLocationInfos] = useState([]);
   const [showSchemePopup, setShowSchemePopup] = useState(false);
 
-  const [previewData, setPreviewData] = useState({id: null, name:''})
+  const [previewData, setPreviewData] = useState({ id: null, name: "" });
 
   useEffect(() => {
     const tg = window.Telegram.WebApp;
@@ -105,15 +105,14 @@ export default function Booking({ refreshToken }) {
       setIsCalendarOpen(false);
       setFormattedRoom("");
       setSelectedRoom(null);
-     
     }
   };
 
   useEffect(() => {
-  if (selectedDate && isCalendarOpen === false) {
-    openRoomPopup();
-  }
-}, [selectedDate]);
+    if (selectedDate && selectedLocation && isCalendarOpen === false) {
+      openRoomPopup();
+    }
+  }, [selectedDate]);
 
   // --- выбор локации ---
   const handleLocationSelection = (loc) => {
@@ -160,7 +159,7 @@ export default function Booking({ refreshToken }) {
     const mapped = places.map((p) => ({
       placeId: p.id,
       num: p.name,
-      isBusy: p.status ,
+      isBusy: p.status,
     }));
     setRooms(mapped);
     setIsRoomsLoading(false);
@@ -262,12 +261,15 @@ export default function Booking({ refreshToken }) {
     }
   };
 
-const fetchLocationInfos = async () => {
+  const fetchLocationInfos = async () => {
     let token = getCookie("access_token") || (await refreshToken());
     if (!token) return;
-    const resp = await fetch("https://beta-seathub.aeroclub.ru/Booking/location_infos", {
-      headers: { Accept: "text/plain", Authorization: `Bearer ${token}` },
-    });
+    const resp = await fetch(
+      "https://beta-seathub.aeroclub.ru/Booking/location_infos",
+      {
+        headers: { Accept: "text/plain", Authorization: `Bearer ${token}` },
+      }
+    );
     if (resp.status === 401) {
       token = await refreshToken();
       if (token) return fetchLocationInfos();
@@ -282,7 +284,7 @@ const fetchLocationInfos = async () => {
     fetchLocationInfos();
   }, []);
 
-     const handleShowScheme = (locId, locName) => {
+  const handleShowScheme = (locId, locName) => {
     const info = locationInfos.find((li) => li.locationId === locId);
     setSchemeImageUrl(info?.imageUrl || "");
     setSchemeLocationName(locName);
@@ -313,11 +315,10 @@ const fetchLocationInfos = async () => {
                     } ${
                       selectedLocation?.id === loc.id ? "location_chosen" : ""
                     }`}
-                    onClick={() =>{
-setPreviewData({'id':loc.id, 'name': loc.name})
+                    onClick={() => {
+                      setPreviewData({ id: loc.id, name: loc.name });
                       !loc.isDisabled && handleLocationSelection(loc);
-                    }
-                    }
+                    }}
                   >
                     {loc.name}
                   </div>
@@ -326,25 +327,23 @@ setPreviewData({'id':loc.id, 'name': loc.name})
                 <Loader isFull={false} />
               )}
             </div>
-
-          
           </div>
-            {
-              previewData.id &&(
-                <button className="button gbutton preview_button" onClick={()=>{
-                      handleShowScheme(previewData.id, previewData.name)
-
-                }}>Предпросмотр схемы</button>
-              )
-            }
+          {previewData.id && (
+            <button
+              className="button gbutton preview_button"
+              onClick={() => {
+                handleShowScheme(previewData.id, previewData.name);
+              }}
+            >
+              Предпросмотр схемы
+            </button>
+          )}
         </div>
         {showSchemePopup && (
           <ShowImg
-         
-
             imageUrl={schemeImageUrl}
-          locationName={schemeLocationName}
-          closeScheme={handleCloseScheme}
+            locationName={schemeLocationName}
+            closeScheme={handleCloseScheme}
           />
         )}
         <div
@@ -427,11 +426,15 @@ setPreviewData({'id':loc.id, 'name': loc.name})
                     <div
                       key={i}
                       className={`page_popup_rooms_item ${
-                        r.isBusy === 'occupied' ? "occupied" : r.isBusy === 'occupiedByUser' ? 'occupiedByUser' : "active"
+                        r.isBusy === "occupied"
+                          ? "occupied"
+                          : r.isBusy === "occupiedByUser"
+                          ? "occupiedByUser"
+                          : "active"
                       } ${
                         selectedRoom?.placeId === r.placeId ? "choice_room" : ""
                       }`}
-                      onClick={() => r.isBusy === 'free'   && setSelectedRoom(r)}
+                      onClick={() => r.isBusy === "free" && setSelectedRoom(r)}
                     >
                       {r.num}
                     </div>
