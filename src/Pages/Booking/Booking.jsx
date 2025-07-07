@@ -38,7 +38,7 @@ export default function Booking({ refreshToken }) {
   const [locationInfos, setLocationInfos] = useState([]);
   const [showSchemePopup, setShowSchemePopup] = useState(false);
   const [isAllbusy, setIsAllbusy] = useState(false);
-const [isAllmine, setIsAllmine]= useState(false);
+  const [isAllmine, setIsAllmine] = useState(false);
   const [previewData, setPreviewData] = useState({ id: null, name: "" });
 
   useEffect(() => {
@@ -122,23 +122,38 @@ const [isAllmine, setIsAllmine]= useState(false);
     setSelectedRoom(null);
   };
 
+
+  const handleApiError = (errorObj, setErrorText, setShowErrorPopup) => {
+  if (errorObj?.errorCode === 2002 && errorObj?.error?.includes("заблокирован")) {
+    setErrorText(errorObj.error);
+    setShowErrorPopup(true);
+    return true; // ошибка обработана
+  }
+  return false; // не обработана
+};
+
+
   // --- загрузка комнат ---
   const fetchRooms = async (locationId, dateIso) => {
-    setLoading(true);
+  setLoading(true);
+  setIsRoomsLoading(true);
 
-    setIsRoomsLoading(true);
-    let token = getCookie("access_token") || (await refreshToken());
-    if (!token) {
-      console.error("Нет токена");
-      setIsRoomsLoading(false);
-      return;
-    }
-    const userEmail = getCookie("user_email");
-    const params = new URLSearchParams({
-      UserEmail: userEmail,
-      LocationId: locationId,
-      Date: dateIso,
-    });
+  let token = getCookie("access_token") || (await refreshToken());
+  if (!token) {
+    console.error("Нет токена");
+    setIsRoomsLoading(false);
+    return;
+  }
+
+  const userEmail = getCookie("user_email");
+  const params = new URLSearchParams({
+    // UserEmail: 'zhukov@aeroclub.ru', 
+    UserEmail: userEmail, 
+    LocationId: locationId,
+    Date: dateIso,
+  });
+
+  try {
     const resp = await fetch(
       `https://beta-seathub.aeroclub.ru/Booking/location_places?${params}`,
       {
@@ -148,36 +163,61 @@ const [isAllmine, setIsAllmine]= useState(false);
         },
       }
     );
+
     if (resp.status === 401) {
       token = await refreshToken();
       if (token) return fetchRooms(locationId, dateIso);
     }
-    if (!resp.ok) throw new Error(resp.status);
-    console.log(resp);
 
     const json = await resp.json();
+
+    // 👉 Обработка ошибок от сервера с текстом
+    if (!resp.ok || json?.errorCode) {
+      if (handleApiError(json, setErrorText, setShowErrorPopup)) {
+        setIsRoomsLoading(true);
+        setLoading(false);
+      setIsRoomPopupOpen(false);
+        return;
+      }
+      throw new Error(`Ошибка: ${resp.status}`);
+    }
+
     const places = json?.data?.locationPlaces ?? [];
     const mapped = places.map((p) => ({
       placeId: p.id,
       num: p.name,
       isBusy: p.status,
     }));
+
     setRooms(mapped);
     setIsRoomsLoading(false);
     setLoading(false);
-const allBusy = mapped.every((room) => room.isBusy !== "free");
-setIsAllbusy(allBusy);
 
-const hasMine = mapped.some((room) => room.isBusy === "occupiedByUser");
-setIsAllmine(hasMine);
+    const allBusy = mapped.every((room) => room.isBusy !== "free");
+    setIsAllbusy(allBusy);
+
+    const hasMine = mapped.some((room) => room.isBusy === "occupiedByUser");
+    setIsAllmine(hasMine);
 
     console.log(mapped);
-  };
+  } catch (err) {
+    console.error("Ошибка при загрузке комнат:", err);
+    if (!showErrorPopup) {
+      setErrorText("Произошла ошибка при загрузке комнат.");
+      setShowErrorPopup(true);
+    }
+    setIsRoomsLoading(false);
+    setLoading(false);
+  }
+};
+
+
 
   const openRoomPopup = () => {
     if (!selectedLocation) {
       setErrorText("Сначала выберите локацию");
       setShowErrorPopup(true);
+      
       return;
     }
     if (!selectedDate) {
@@ -199,74 +239,83 @@ setIsAllmine(hasMine);
     }
   };
 
-  const handleBooking = async () => {
-    if (!selectedDate || !selectedLocation || !selectedRoom) {
-      setShowBookingFields(true);
-      return;
-    }
+ const handleBooking = async () => {
+  if (!selectedDate || !selectedLocation || !selectedRoom) {
+    setShowBookingFields(true);
+    return;
+  }
 
-    const userEmail = getCookie("user_email");
-    const body = {
-      userEmail: userEmail,
-      locationPlaceId: selectedRoom.placeId,
-      date: selectedDate.toISOString(),
-      deleteExistedBooking: false,
-    };
+  const userEmail = getCookie("user_email");
+  const body = {
+    userEmail: userEmail,
+        // userEmail: 'zhukov@aeroclub.ru', 
 
-    console.log(selectedDate.toISOString().split("T")[0]);
-
-    let token = getCookie("access_token") || (await refreshToken());
-    if (!token) return console.error("Нет токена");
-
-    try {
-      setLoading(true);
-      const resp = await fetch(
-        "https://beta-seathub.aeroclub.ru/Booking/book",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(body),
-        }
-      );
-
-      if (resp.status === 401) {
-        token = await refreshToken();
-        if (token) return handleBooking();
-      }
-
-      const text = await resp.text();
-
-      if (!resp.ok) {
-        console.error("Ошибка от сервера:", resp.status, text);
-
-        try {
-          const errorData = JSON.parse(text);
-          console.log(errorData.errorCode);
-          if (errorData.errorCode === 3001) {
-            console.log("ppp");
-            setErrorText(
-              errorData.error + " Пожалуйста, выберите другую дату."
-            ); // Передаем текст ошибки
-            setShowErrorPopup(true); // Показываем всплывающее окно
-          }
-        } catch (parseError) {
-          console.error("Ошибка парсинга ответа:", parseError);
-        }
-
-        throw new Error(`Status ${resp.status}`);
-      }
-
-      setShowSuccess(true);
-    } catch (e) {
-      console.error("Ошибка бронирования:", e);
-    } finally {
-      setLoading(false);
-    }
+    locationPlaceId: selectedRoom.placeId,
+    date: selectedDate.toISOString(),
+    deleteExistedBooking: false,
   };
+
+  let token = getCookie("access_token") || (await refreshToken());
+  if (!token) return console.error("Нет токена");
+
+  try {
+    setLoading(true);
+    const resp = await fetch(
+      "https://beta-seathub.aeroclub.ru/Booking/book",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (resp.status === 401) {
+      token = await refreshToken();
+      if (token) return handleBooking();
+    }
+
+    const text = await resp.text();
+
+    if (!resp.ok) {
+      console.error("Ошибка от сервера:", resp.status, text);
+
+      try {
+        const errorData = JSON.parse(text);
+
+        // ✅ Универсальная обработка ошибок
+        if (handleApiError(errorData, setErrorText, setShowErrorPopup)) {
+          return;
+        }
+
+        // 👇 Пример специфической обработки, если нужно оставить
+        if (errorData.errorCode === 3001) {
+          setErrorText(errorData.error + " Пожалуйста, выберите другую дату.");
+          setShowErrorPopup(true);
+          return;
+        }
+      } catch (parseError) {
+        console.error("Ошибка парсинга ответа:", parseError);
+      }
+
+      throw new Error(`Status ${resp.status}`);
+    }
+
+    setShowSuccess(true);
+  } catch (e) {
+    console.error("Ошибка бронирования:", e);
+    if (!showErrorPopup) {
+      setErrorText("Произошла ошибка при бронировании.");
+      setShowErrorPopup(true);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const fetchLocationInfos = async () => {
     let token = getCookie("access_token") || (await refreshToken());
@@ -451,12 +500,9 @@ setIsAllmine(hasMine);
               <div className="tobook_date_buttons_wrapper">
                 {isAllbusy ? (
                   <p>Свободных мест нет</p>
-                ) : 
-                isAllmine ? (
+                ) : isAllmine ? (
                   <p>Уже есть бронь на эту дату</p>
-
-                ) :
-                (
+                ) : (
                   <button
                     className="button rbutton tobook_pick_date_button"
                     onClick={handleConfirmRoom}

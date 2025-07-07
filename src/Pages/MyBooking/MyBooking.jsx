@@ -8,6 +8,7 @@ import Loader from "../../Components/Loader/Loader";
 import Calendar from "react-calendar";
 import DeleteBooking from "../../Components/DeleteBooking/DeleteBooking";
 import ShowImg from "../../Components/ShowImg/ShowImg";
+import ShowError from "../../Components/ShowError/ShowError";
 
 export default function MyBooking({ refreshToken }) {
   const [bookings, setBookings] = useState([]);
@@ -21,6 +22,11 @@ export default function MyBooking({ refreshToken }) {
   const [schemeImageUrl, setSchemeImageUrl] = useState("");
   const [schemeLocationName, setSchemeLocationName] = useState("");
   const [locationInfos, setLocationInfos] = useState([]);
+
+  const [errorText, setErrorText] = useState("");
+const [showErrorPopup, setShowErrorPopup] = useState(false);
+
+
   const getCookie = (name) => {
     const c = document.cookie
       .split("; ")
@@ -28,19 +34,32 @@ export default function MyBooking({ refreshToken }) {
     return c ? c.split("=")[1] : null;
   };
 
-  const fetchBookings = async () => {
-    setIsLoading(true);
-    let token = getCookie("access_token") || (await refreshToken());
-    if (!token) {
-      console.error("Нет токена");
-      setIsLoading(false);
-      return;
-    }
+const handleApiError = (responseJson, setErrorText, setShowErrorPopup) => {
+  if (responseJson?.errorCode && responseJson?.error) {
+    setErrorText(responseJson.error);
+    setShowErrorPopup(true);
+    return true;
+  }
+  return false;
+};
 
-    const userEmail = getCookie("user_email") ;
-    const params = new URLSearchParams({
-      UserEmail: userEmail,
-    });
+
+const fetchBookings = async () => {
+  setIsLoading(true);
+  let token = getCookie("access_token") || (await refreshToken());
+  if (!token) {
+    console.error("Нет токена");
+    setIsLoading(false);
+    return;
+  }
+
+  const userEmail = getCookie("user_email");
+  const params = new URLSearchParams({
+    UserEmail: userEmail,
+    // UserEmail: 'zhukov@aeroclub.ru', 
+  });
+
+  try {
     const resp = await fetch(
       `https://beta-seathub.aeroclub.ru/Booking/bookings?${params}`,
       {
@@ -50,17 +69,22 @@ export default function MyBooking({ refreshToken }) {
         },
       }
     );
+
     if (resp.status === 401) {
       token = await refreshToken();
       if (token) return fetchBookings();
     }
-    if (!resp.ok) {
-      console.error("Ошибка загрузки бронирований:", resp.status);
-      setIsLoading(false);
-      return;
-    }
 
     const json = await resp.json();
+
+    if (!resp.ok || json?.errorCode) {
+      if (handleApiError(json, setErrorText, setShowErrorPopup)) {
+        setIsLoading(true);
+        return;
+      }
+      throw new Error(`Ошибка: ${resp.status}`);
+    }
+
     const list = (json?.data?.bookings || []).map((b) => ({
       id: b.id,
       rawDate: new Date(b.date),
@@ -70,9 +94,19 @@ export default function MyBooking({ refreshToken }) {
       number: b.locationPlace.name,
       location: b.locationPlace.location.name,
     }));
+
     setBookings(list);
+  } catch (err) {
+    console.error("Ошибка загрузки бронирований:", err);
+    if (!showErrorPopup) {
+      setErrorText("Произошла ошибка при загрузке бронирований.");
+      setShowErrorPopup(true);
+    }
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
+
 
   useEffect(() => {
     fetchBookings();
@@ -169,6 +203,13 @@ const fetchLocationInfos = async () => {
           closeScheme={handleCloseScheme}
         />
       )}
+      {showErrorPopup && (
+  <ShowError
+    errorText={errorText}
+    setShowErrorPopup={setShowErrorPopup}
+  />
+)}
+
       {/* <ShowImg imageUrl={'../../assets/flag.svg'}/> */}
       {!isLoading && bookings.length > 0 ? (
         <>

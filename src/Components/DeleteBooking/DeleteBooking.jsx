@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./DeleteBooking.scss";
 import Loader from "../Loader/Loader";
+import ShowError from "../ShowError/ShowError";
 export default function DeleteBooking({
   setShowDeletePopup,
   showDeletePopup,
@@ -8,15 +9,29 @@ export default function DeleteBooking({
   refreshToken,
   setBookings,
 }) {
+  const [errorText, setErrorText] = useState("");
+const [showErrorPopup, setShowErrorPopup] = useState(false);
+const handleApiError = (responseJson, setErrorText, setShowErrorPopup) => {
+  if (responseJson?.errorCode && responseJson?.error) {
+    setErrorText(responseJson.error);
+    setShowErrorPopup(true);
+    return true;
+  }
+  return false;
+};
+
   const [loading, setLoading] =useState(false)
-  const handleDelete = async (id) => {
-    setLoading(true)
-    const userEmail = getCookie("user_email");
-    const params = new URLSearchParams({
-      BookingId: id,
-      UserEmail: userEmail,
-    });
-    const token = getCookie("access_token") || (await refreshToken());
+const handleDelete = async (id) => {
+  setLoading(true);
+  const userEmail = getCookie("user_email");
+  const params = new URLSearchParams({
+    BookingId: id,
+        // UserEmail: 'zhukov@aeroclub.ru', 
+    UserEmail: userEmail,
+  });
+  const token = getCookie("access_token") || (await refreshToken());
+
+  try {
     const resp = await fetch(
       `https://beta-seathub.aeroclub.ru/Booking?${params}`,
       {
@@ -24,18 +39,38 @@ export default function DeleteBooking({
         headers: { Accept: "text/plain", Authorization: `Bearer ${token}` },
       }
     );
-    if (resp.ok) {
-      setBookings((prev) => prev.filter((b) => b.id !== id));
-    } else {
-      console.error("Ошибка удаления:", resp.status);
-      
+
+    const json = await resp.json();
+
+    if (!resp.ok || json?.errorCode) {
+      if (handleApiError(json, setErrorText, setShowErrorPopup)) {
+        setLoading(false);
+        return;
+      }
+      throw new Error(`Ошибка: ${resp.status}`);
     }
-    setLoading(false)
-setShowDeletePopup(false)
-  };
+
+    setBookings((prev) => prev.filter((b) => b.id !== id));
+    setShowDeletePopup(false);
+  } catch (err) {
+    console.error("Ошибка удаления:", err);
+    if (!showErrorPopup) {
+      setErrorText("Произошла ошибка при удалении бронирования.");
+      setShowErrorPopup(true);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <div className="page_popup page_popup_tobook">
-
+{showErrorPopup && (
+  <ShowError
+    errorText={errorText}
+    setShowErrorPopup={setShowErrorPopup}
+  />
+)}
       {loading && (
                 <Loader isFull={true} />
         
